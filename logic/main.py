@@ -14,7 +14,8 @@ from logic.utils.ai_search import (
     extract_text_from_docx,
     extract_text_from_pdf,
     extract_text_from_txt,
-    save_text_to_vector_index
+    save_text_to_vector_index,
+    save_to_index
 )
 
 # Accepted file types
@@ -61,7 +62,7 @@ def main():
     
     # Iterate through files
     for filename in files_for_index:
-        
+
         # Check File type
         # if not accepted file type, skip
         file_extension = os.path.splitext(filename)[1].lower()
@@ -86,13 +87,15 @@ def main():
         elif file_extension == '.pdf':
             file_text = extract_text_from_pdf(blob_data)
         
-        print(f'{filename}\n{file_text}\n\n')
-        
         # Save File to index
-        saved_to_index = save_text_to_vector_index(
+        # saved_to_index = save_text_to_vector_index(
+        #     text=file_text,
+        #     file_name=filename,
+        #     index_name=os.getenv("AZURE_SEARCH_INDEX_NAME")
+        # )
+        saved_to_index = save_to_index(
             text=file_text,
-            file_name=filename,
-            index_name=os.getenv("AZURE_SEARCH_INDEX_NAME")
+            file_name=filename
         )
         
         # If saved, save to cosmos
@@ -101,5 +104,6 @@ def main():
                 filename=filename,
                 container_client=container_client
             )
+            logging.info(f'Saved <{filename}> to cosmos.')
     
     return True
